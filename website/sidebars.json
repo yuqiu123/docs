@@ -6,6 +6,7 @@
     "Deploy": [
       "deploy/prerequisites",
       "deploy/install-iomesh",
+      "deploy/install-iomesh-offline",
       "deploy/setup-iomesh",
       "deploy/setup-storageclass",
       "deploy/setup-snapshotclass"
