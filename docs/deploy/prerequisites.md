@@ -6,20 +6,20 @@ sidebar_label: Prerequisites
 
 ## Installation Requirements
 
-- A Kubernetes (from v1.17 to v1.21) cluster with at least 3 worker nodes
-- Each worker node needs
-  - At least one free SSD for IOMesh journal and cache
-  - At least one free HDD for IOMesh datastore
-  - A 10GbE NIC or above for IOMesh storage network
-  - At least 100GB free space at /opt
+- A Kubernetes (from v1.17 to v1.21) cluster with at least three worker nodes.
+- Each worker node requires:
+  - At least one 100Gb-available-space SSD for the IOMesh journal and cache
+  - At least one 100Gb-available-space HDD for the IOMesh datastore
+  - A network card of 10GbE or above for the IOMesh storage network
+  - At least 100Gb of disk space in the /opt directory on each worker node
 
-## Setup Worker Node
+## Set Up Worker Node
 
-For each Kubernetes worker node that will run IOMesh, follow the following steps:
+Follow the steps below to set up each Kubernetes worker node running IOMesh.
 
-### Setup Open-ISCSI
+### Set Up Open-ISCSI
 
-1. Install open-iscsi:
+1. Install open-iscsi by entering the following script.
 
   <!--DOCUSAURUS_CODE_TABS-->
     <!--RHEL/CentOS-->
@@ -33,37 +33,37 @@ For each Kubernetes worker node that will run IOMesh, follow the following steps
 
   <!--END_DOCUSAURUS_CODE_TABS-->
 
-2. Edit `/etc/iscsi/iscsid.conf` by setting `node.startup` to `manual`:
+2. Edit `/etc/iscsi/iscsid.conf` by setting `node.startup` to `manual`.
 
     ```shell
     sudo sed -i 's/^node.startup = automatic$/node.startup = manual/' /etc/iscsi/iscsid.conf
     ```
-    > **_NOTE_: The default value of the MaxRecvDataSegmentLength in /etc/iscsi/iscsi.conf is 32,768, which limits the maximum number of PVs(about 80,000) in IOMesh. If you want to create more than 80,000 PVs in IOMesh, it is recommended to set the value of MaxRecvDataSegmentLength to 163,840 or higher.**
+    > **_NOTE_: The default value of MaxRecvDataSegmentLength in /etc/iscsi/iscsi.conf is set at 32,768, and the maximum number of PVs is limited to 80,000 in IOMesh. To create PVs more than 80,000 in IOMesh, it is recommended to set the value of MaxRecvDataSegmentLength to 163,840 or above.**
 
-3. Disable SELinux:
+3. Disable SELinux by entering the following script.
 
     ```shell
     sudo setenforce 0
     sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
     ```
 
-4. Ensure `iscsi_tcp` kernel module is loaded:
+4. Ensure `iscsi_tcp` kernel module is loaded.
 
     ```shell
     sudo modprobe iscsi_tcp
     sudo bash -c 'echo iscsi_tcp > /etc/modprobe.d/iscsi-tcp.conf'
     ```
 
-5. Start `iscsid` service:
+5. Start `iscsid` service.
 
     ```shell
     sudo systemctl enable --now iscsid
     ```
 
-### Setup Local Metadata Store
+### Set Up Local Metadata Store
 
-IOMesh uses local path `/opt/iomesh` to store metadata. Ensure that there is at least 100 GB free space at `/opt`.
+IOMesh stores metadata in the local path `/opt/iomesh`. Make sure that there is at least 100GB of available disk space in the /opt directory. 
 
-### Setup Data Network
+### Set Up Data Network
 
-To avoid contention on network bandwith, it is necessary to setup a seperate network segment for IOMesh cluster. The `dataCIDR` defines the IP block for IOMesh data network. Every node running IOMesh should have an interface with IP address belonging to the `dataCIDR`.
+To avoid contention on network bandwidth, set up a separate network segment for the IOMesh Cluster. The `dataCIDR` defines IP block for the IOMesh data network. Every worker node running IOMesh should have an interface with an IP address belonging to `dataCIDR`.
